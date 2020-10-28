@@ -47,7 +47,6 @@ const executeRequest = curry((params: AxiosRequestConfig, client: AxiosInstance)
 
 export const makeAuthenticatedRequest = (params: AxiosRequestConfig): Promise<Either<Error, any>> => {
   return pipe(
-
     getToken(),
     getAuthenticatedClient,
     TaskEither.chain(executeRequest(params))
