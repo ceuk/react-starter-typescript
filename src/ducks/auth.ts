@@ -1,4 +1,4 @@
-import { Action, ActionCreatorWithNonInferrablePayload, ActionCreatorWithOptionalPayload, ActionCreatorWithPayload, CaseReducer, createSlice, PayloadAction, PayloadActionCreator } from '@reduxjs/toolkit'
+import { ActionCreatorWithNonInferrablePayload, CaseReducer, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import * as Either from 'fp-ts/Either'
 import { call, put, takeLatest } from 'redux-saga/effects'
 import { loginRequest, validateTokenRequest } from '../api/methods/auth'
