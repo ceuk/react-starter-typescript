@@ -35,6 +35,11 @@ const getAuthenticatedClient = (maybeToken: TaskEither.TaskEither<Error, string>
     })))
 }
 
+const getUnauthenticatedClient = (): TaskEither.TaskEither<Error, AxiosInstance> => {
+  const baseURL = baseURLs[process.env.NODE_ENV] || baseURLs.development
+  return TaskEither.of(axios.create({ baseURL }))
+}
+
 const executeRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) => {
   return pipe(
     TaskEither.tryCatch(
@@ -49,6 +54,13 @@ export const makeAuthenticatedRequest = (params: AxiosRequestConfig): Promise<Ei
   return pipe(
     getToken(),
     getAuthenticatedClient,
+    TaskEither.chain(executeRequest(params))
+  )()
+}
+
+export const makeUnauthenticatedRequest = (params: AxiosRequestConfig): Promise<Either<Error, any>> => {
+  return pipe(
+    getUnauthenticatedClient(),
     TaskEither.chain(executeRequest(params))
   )()
 }
