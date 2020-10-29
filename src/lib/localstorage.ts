@@ -8,7 +8,7 @@ import { curry, partial } from 'ramda'
  * @param key localStorage property to retrieve
  * @returns Either error deserialized value
  */
-export const getItem = (key: string): Either<Error, unknown> => {
+export const getItem = <T = unknown>(key: string): Either<Error, T> => {
   return tryCatch(
     () => pipe(
       key,
