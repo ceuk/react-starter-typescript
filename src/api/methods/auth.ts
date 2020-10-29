@@ -6,7 +6,6 @@ import { ILoginPayload, IStoredToken } from '../../types/auth'
  * Attempts to log in using the supplied credentials
  *
  * @param credentials email and password
- * @returns
  * @returns A promisified http call that resolves to an either
  */
 export const loginRequest = ({ email, password }: ILoginPayload): Promise<Either<Error, IStoredToken>> => {

@@ -58,21 +58,21 @@ const getUnauthenticatedClient = (): TaskEither.TaskEither<Error, AxiosInstance>
 }
 
 /**
- * Executes the supplied axios params on the supplied axios client and
- * wraps in a TaskEither
+ * Applies the supplied axios params to the supplied axios client and
+ * wraps the ready-to-call request in a TaskEither
  *
  * @Remarks curried
  * @param params axios request params
  * @param client axios client instance
  * @returns TaskEither containing the request to be executed
  */
-const executeRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) => {
+const createRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) => {
   return pipe(
     TaskEither.tryCatch(
       () => client(params),
       identity
     ),
-    TaskEither.map((res) => res.data as any)
+    TaskEither.map(prop('data'))
   )
 })
 
@@ -86,7 +86,7 @@ export const makeAuthenticatedRequest = (params: AxiosRequestConfig): Promise<Ei
   return pipe(
     getToken(),
     getAuthenticatedClient,
-    TaskEither.chain(executeRequest(params))
+    TaskEither.chain(createRequest(params))
   )()
 }
 
@@ -99,6 +99,6 @@ export const makeAuthenticatedRequest = (params: AxiosRequestConfig): Promise<Ei
 export const makeUnauthenticatedRequest = (params: AxiosRequestConfig): Promise<Either<Error, any>> => {
   return pipe(
     getUnauthenticatedClient(),
-    TaskEither.chain(executeRequest(params))
+    TaskEither.chain(createRequest(params))
   )()
 }
