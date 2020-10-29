@@ -1,7 +1,7 @@
 import { ActionCreatorWithNonInferrablePayload, CaseReducer, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import * as Either from 'fp-ts/Either'
 import { call, put, takeLatest } from 'redux-saga/effects'
 import { loginRequest, validateTokenRequest } from '../api/methods/auth'
+import Either from '../lib/either'
 import { removeItem, setItem } from '../lib/localstorage'
 import { ILoginPayload, IStoredToken } from '../types/auth'
 import { IAuthState } from '../types/state'
@@ -54,8 +54,9 @@ function * onLoginAttempt ({ payload }: ReturnType<typeof actions.LOGIN_ATTEMPT>
   const res = yield call(loginRequest, payload)
   yield put(Either.fold(
     (err: Error) => actions.LOGIN_FAILED(String(err)),
-    actions.LOGIN_SUCCESS as ActionCreatorWithNonInferrablePayload
-  )(res))
+    actions.LOGIN_SUCCESS as ActionCreatorWithNonInferrablePayload,
+    res
+  ))
 }
 
 function * onLoginSuccess ({ payload }: ReturnType<typeof actions.LOGIN_SUCCESS>) {
@@ -68,7 +69,7 @@ function * onLoginFailed () {
 
 function * onLoginRestored () {
   const res = yield call(validateTokenRequest)
-  if (Either.isLeft(res)) {
+  if (res.isLeft) {
     yield put(actions.LOGOUT_SUCCESS())
   }
 }

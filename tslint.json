@@ -6,6 +6,10 @@
   ],
   "jsRules": {},
   "rules": {
+    "max-classes-per-file": [
+      true,
+      4
+    ],
     "await-promise": [
       false
     ],

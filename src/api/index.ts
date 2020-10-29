@@ -1,10 +1,9 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { Either } from 'fp-ts/lib/Either'
-import { pipe } from 'fp-ts/lib/function'
-import * as TaskEither from 'fp-ts/lib/TaskEither'
-import { curry, identity, prop } from 'ramda'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import Either from '../lib/either'
+import { chain, curry, identity, map, pipe, prop } from '../lib/helpers'
 import { getItem } from '../lib/localstorage'
-import { IStoredToken, MakeCommonRequest } from '../types/auth'
+import TaskEither from '../lib/taskeither'
+import { MakeCommonRequest } from '../types/auth'
 import { AnyFnSingleParam } from '../types/common'
 
 // API Config
@@ -22,9 +21,9 @@ const baseURLs = {
  */
 const getToken = () => {
   return pipe(
-    TaskEither.fromEither<Error, IStoredToken>(getItem('currentUser')),
-    TaskEither.map(prop('token'))
-  )
+    getItem,
+    map(prop('token'))
+  )('currentUser')
 }
 
 /**
@@ -33,19 +32,18 @@ const getToken = () => {
  * @param maybeToken TaskEither-wrapped token string
  * @returns axios client wrapped in TaskEither
  */
-const getAuthenticatedClient = (maybeToken: TaskEither.TaskEither<Error, string>) => {
+const getAuthenticatedClient = (maybeToken: Either) => {
   // TODO - make this pure
   const baseURL = baseURLs[process.env.NODE_ENV] || baseURLs.development
   return pipe(
-    maybeToken,
-    TaskEither.map((token) => axios.create({
+    map((token: string) => axios.create({
       baseURL,
       headers: {
         common: {
           Authorization: `Bearer ${token}`
         }
       }
-    })))
+    })))(maybeToken)
 }
 
 /**
@@ -55,7 +53,7 @@ const getAuthenticatedClient = (maybeToken: TaskEither.TaskEither<Error, string>
  */
 const getUnauthenticatedClient = () => {
   const baseURL = baseURLs[process.env.NODE_ENV] || baseURLs.development
-  return TaskEither.of<Error, AxiosInstance>(axios.create({ baseURL }))
+  return Either.of(axios.create({ baseURL }))
 }
 
 /**
@@ -68,13 +66,13 @@ const getUnauthenticatedClient = () => {
  * @returns TaskEither containing the request to be executed
  */
 const createRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) => {
-  return pipe(
-    TaskEither.tryCatch<AxiosError, AxiosResponse<any>>(
-      () => client(params),
-      identity as AnyFnSingleParam
-    ),
-    TaskEither.map(prop('data'))
+  const requestTask = TaskEither.tryCatch(
+    () => client(params),
+    identity as AnyFnSingleParam
   )
+  return pipe(
+    map(prop('data'))
+  )(requestTask)
 })
 
 /**
@@ -84,11 +82,12 @@ const createRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) 
  * @returns A promisified http call that resolves to an either
  */
 export const makeAuthenticatedRequest: MakeCommonRequest = (params) => {
-  return pipe(
-    getToken(),
+  const request = pipe(
+    getToken,
     getAuthenticatedClient,
-    TaskEither.chain(createRequest(params))
+    chain(createRequest(params))
   )()
+  return request.run()
 }
 
 /**
@@ -98,8 +97,9 @@ export const makeAuthenticatedRequest: MakeCommonRequest = (params) => {
  * @returns A promisified http call that resolves to an either
  */
 export const makeUnauthenticatedRequest: MakeCommonRequest = (params) => {
-  return pipe(
-    getUnauthenticatedClient(),
-    TaskEither.chain(createRequest(params))
+  const request = pipe(
+    getUnauthenticatedClient,
+    chain(createRequest(params)),
   )()
+  return request.run()
 }

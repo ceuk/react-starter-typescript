@@ -1,6 +1,3 @@
-import * as Either from 'fp-ts/Either'
-import { pipe } from 'fp-ts/lib/function'
-import { prop } from 'ramda'
 import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import './App.css'
@@ -16,9 +13,9 @@ interface IAppProps {
 
 const App: React.FC<IAppProps> = ({ restoreSession }) => {
   useEffect(() => {
-    const cachedCredentials = getItem('currentUser') as Either.Either<Error, IStoredToken>
-    if (!Either.isLeft(cachedCredentials) && cachedCredentials.right) {
-      restoreSession(cachedCredentials.right)
+    const cachedCredentials = getItem('currentUser')
+    if (!cachedCredentials.isLeft && cachedCredentials.value) {
+      restoreSession(cachedCredentials.value)
     }
   }, [])
   return (

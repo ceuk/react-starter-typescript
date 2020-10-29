@@ -1,6 +1,5 @@
-import { Either, tryCatch } from 'fp-ts/lib/Either'
-import { pipe } from 'fp-ts/lib/function'
-import { curry, partial } from 'ramda'
+import Either, { Left, Right } from './either'
+import { curry, partial, pipe } from './helpers'
 
 /**
  * Pure version of localStorage.getItem that won't throw
@@ -8,14 +7,13 @@ import { curry, partial } from 'ramda'
  * @param key localStorage property to retrieve
  * @returns Either error deserialized value
  */
-export const getItem = <T = unknown>(key: string): Either<Error, T> => {
-  return tryCatch(
+export const getItem = <T = unknown>(key: string): Left | Right => {
+  return Either.tryCatch(
     () => pipe(
-      key,
       localStorage.getItem.bind(localStorage),
       String,
       JSON.parse.bind(JSON),
-    ),
+    )(key),
     (reason) => new Error(String(reason))
   )
 }
@@ -28,15 +26,14 @@ export const getItem = <T = unknown>(key: string): Either<Error, T> => {
  * @param value value to serialize and write to localStorage
  * @returns Either error or null
  */
-export const setItem = curry((key: string, value: any): Either<Error, null> => {
-  return tryCatch(
+export const setItem = curry((key: string, value: any): Either => {
+  return Either.tryCatch(
     () => {
       const writeToLS = partial(localStorage.setItem.bind(localStorage), [key])
       pipe(
-        value,
         JSON.stringify.bind(JSON),
         writeToLS,
-      )
+      )(value)
       return null
     },
     (reason) => new Error(String(reason))
@@ -49,12 +46,9 @@ export const setItem = curry((key: string, value: any): Either<Error, null> => {
  * @param key localStorage property to remove
  * @returns Either error or void
  */
-export const removeItem = (key: string): Either<Error, void> => {
-  return tryCatch(
-    () => pipe(
-      key,
-      localStorage.removeItem.bind(localStorage)
-    ),
+export const removeItem = (key: string): Either => {
+  return Either.tryCatch(
+    () => localStorage.removeItem.bind(localStorage)(key),
     (reason) => new Error(String(reason))
   )
 }
