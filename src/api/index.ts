@@ -1,10 +1,11 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { Either } from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/function'
 import * as TaskEither from 'fp-ts/lib/TaskEither'
 import { curry, identity, prop } from 'ramda'
 import { getItem } from '../lib/localstorage'
-import { IStoredToken } from '../types/auth'
+import { IStoredToken, MakeCommonRequest } from '../types/auth'
+import { AnyFnSingleParam } from '../types/common'
 
 // API Config
 const baseURLs = {
@@ -21,7 +22,7 @@ const baseURLs = {
  */
 const getToken = () => {
   return pipe(
-    TaskEither.fromEither(getItem('currentUser')) as TaskEither.TaskEither<Error, IStoredToken>,
+    TaskEither.fromEither<Error, IStoredToken>(getItem('currentUser')),
     TaskEither.map(prop('token'))
   )
 }
@@ -52,9 +53,9 @@ const getAuthenticatedClient = (maybeToken: TaskEither.TaskEither<Error, string>
  *
  * @returns axios client wrapped in TaskEither
  */
-const getUnauthenticatedClient = (): TaskEither.TaskEither<Error, AxiosInstance> => {
+const getUnauthenticatedClient = () => {
   const baseURL = baseURLs[process.env.NODE_ENV] || baseURLs.development
-  return TaskEither.of(axios.create({ baseURL }))
+  return TaskEither.of<Error, AxiosInstance>(axios.create({ baseURL }))
 }
 
 /**
@@ -68,9 +69,9 @@ const getUnauthenticatedClient = (): TaskEither.TaskEither<Error, AxiosInstance>
  */
 const createRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) => {
   return pipe(
-    TaskEither.tryCatch(
+    TaskEither.tryCatch<AxiosError, AxiosResponse<any>>(
       () => client(params),
-      identity
+      identity as AnyFnSingleParam
     ),
     TaskEither.map(prop('data'))
   )
@@ -82,7 +83,7 @@ const createRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) 
  * @param params axios request params
  * @returns A promisified http call that resolves to an either
  */
-export const makeAuthenticatedRequest = (params: AxiosRequestConfig): Promise<Either<Error, any>> => {
+export const makeAuthenticatedRequest: MakeCommonRequest = (params) => {
   return pipe(
     getToken(),
     getAuthenticatedClient,
@@ -96,7 +97,7 @@ export const makeAuthenticatedRequest = (params: AxiosRequestConfig): Promise<Ei
  * @param params axios request params
  * @returns A promisified http call that resolves to an either
  */
-export const makeUnauthenticatedRequest = (params: AxiosRequestConfig): Promise<Either<Error, any>> => {
+export const makeUnauthenticatedRequest: MakeCommonRequest = (params) => {
   return pipe(
     getUnauthenticatedClient(),
     TaskEither.chain(createRequest(params))
