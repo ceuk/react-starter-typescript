@@ -1,6 +1,6 @@
 import Either, { Left, Right } from './either'
 import { curry, partial, pipe } from './helpers'
-
+let i = 0
 /**
  * Pure version of localStorage.getItem that won't throw
  *
@@ -13,6 +13,13 @@ export const getItem = <T = unknown>(key: string): Left | Right => {
       localStorage.getItem.bind(localStorage),
       String,
       JSON.parse.bind(JSON),
+      ((e: any) => {
+        if (i > 0) {
+        throw new Error('shit')
+        }
+        i++
+        return e
+      })
     )(key),
     (reason) => new Error(String(reason))
   )

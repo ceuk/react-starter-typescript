@@ -1,6 +1,5 @@
-import { Either } from 'fp-ts/lib/Either'
 import { makeAuthenticatedRequest, makeUnauthenticatedRequest } from '..'
-import { ILoginPayload, IStoredToken } from '../../types/auth'
+import { ILoginPayload } from '../../types/auth'
 
 /**
  * Attempts to log in using the supplied credentials
@@ -8,7 +7,7 @@ import { ILoginPayload, IStoredToken } from '../../types/auth'
  * @param credentials email and password
  * @returns A promisified http call that resolves to an either
  */
-export const loginRequest = ({ email, password }: ILoginPayload): Promise<Either<Error, IStoredToken>> => {
+export const loginRequest = ({ email, password }: ILoginPayload) => {
   return makeUnauthenticatedRequest({
     url: '/auth/login',
     method: 'POST',

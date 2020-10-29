@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios'
-import { Either } from 'fp-ts/lib/Either'
+import { Left, Right } from '../lib/either'
 
 export interface IStoredToken {
   id: string
@@ -11,4 +11,4 @@ export interface ILoginPayload {
   password: string
 }
 
-export type MakeCommonRequest<T = any> = (params: AxiosRequestConfig) => Promise<Either<Error, T>>
+export type MakeCommonRequest<T = any> = (params: AxiosRequestConfig) => Promise<Left | Right> | Error | Left

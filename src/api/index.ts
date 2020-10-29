@@ -87,7 +87,7 @@ export const makeAuthenticatedRequest: MakeCommonRequest = (params) => {
     getAuthenticatedClient,
     chain(createRequest(params))
   )()
-  return request.run()
+  return TaskEither.runIfValid(request)
 }
 
 /**
@@ -101,5 +101,5 @@ export const makeUnauthenticatedRequest: MakeCommonRequest = (params) => {
     getUnauthenticatedClient,
     chain(createRequest(params)),
   )()
-  return request.run()
+  return TaskEither.runIfValid(request)
 }

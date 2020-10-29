@@ -25,6 +25,14 @@ export default class TaskEither extends Task {
     })
   }
 
+  static runIfValid (x: TaskEither | Left | Error): Left | Error | Promise<Left | Right> {
+    return x instanceof TaskEither
+      ? new Promise((resolve) => {
+        x.fork(resolve, resolve)
+      })
+      : x
+  }
+
   map (f: (b: any) => void) {
     const fork = this.fork
     const cleanup = this.cleanup
@@ -49,11 +57,5 @@ export default class TaskEither extends Task {
       ),
       cleanup
     )
-  }
-
-  run () {
-    return new Promise((resolve) => {
-      this.fork(resolve, resolve)
-    })
   }
 }
