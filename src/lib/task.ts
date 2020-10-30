@@ -1,25 +1,28 @@
 import { curry } from 'ramda'
+import { AnyFnSingleParam, PartialMapCallback } from '../types/common'
+import Monad from './monad'
 
-export type TTaskReject = (a?: any) => void
-export type TTaskResolve = (b?: any) => void
-export type TTaskCleanup = (c?: any) => void
-export type TTaskCallback = (reject: TTaskReject, resolve: TTaskResolve) => any
+export type TTaskReject <A = any> = (a?: A) => void
+export type TTaskResolve <B = any> = (b?: B) => void
+export type TTaskCleanup <C = any> = (c?: C) => void
+export type TTaskCallback <A = any, B = any> = (reject: TTaskReject<A>, resolve: TTaskResolve<B>) => any
 
-export default class Task {
+export default class Task<A = any, B = any> extends Monad {
 
-  static of (b: any) {
+  static of <B = any> (b: B) {
     const taskDefault: TTaskCallback = (_, resolve) => resolve(b)
     return new Task(taskDefault)
   }
 
-  static rejected (a: any) {
+  static rejected <A = any> (a: A) {
     return new Task((reject: TTaskReject) => reject(a))
   }
 
-  fork: TTaskCallback
+  fork: TTaskCallback<A, B>
   cleanup: TTaskCleanup
 
-  constructor (computation: TTaskCallback, cleanup?: TTaskCleanup) {
+  constructor (computation: TTaskCallback<A, B>, cleanup?: TTaskCleanup) {
+    super()
     this.fork = computation
     this.cleanup = cleanup || (() => undefined)
   }
@@ -35,11 +38,11 @@ export default class Task {
    * Transforms a failure value into a new Task[a, b]. Does nothing if the
    * structure already contains a successful value.
    */
-  orElse (f: (a: any) => Task) {
+  orElse <A1 = any> (f: (a?: A) => Task) {
     const fork = this.fork
     const cleanup = this.cleanup
 
-    return new Task(
+    return new Task<A1, B>(
       (reject, resolve) => fork(
         (a) => f(a).fork(reject, resolve),
         resolve
@@ -53,11 +56,11 @@ export default class Task {
    * and the rightmost one to the successful value depending on which
    * one is present
    */
-  fold (fa: (a: any) => void, fb: (b: any) => void) {
+  fold <A1 = any, B1 = any> (fa: (a?: A) => any, fb: (b?: B) => B1) {
     const fork = this.fork
     const cleanup = this.cleanup
 
-    return new Task(
+    return new Task<A1, B1>(
       (_, resolve) => fork(
         (a) => resolve(fa(a)),
         (b) => resolve(fb(b))
@@ -68,16 +71,16 @@ export default class Task {
 
   /**
    * Transforms the successful value of the task
-   * using a function to a monad
+   * using a regular unary function
    */
-  chain (f: (b: any) => Task) {
+  map <B1 = any> (f: PartialMapCallback<B, B1>) {
     const fork = this.fork
     const cleanup = this.cleanup
 
-    return new Task(
+    return new Task<A, B1>(
       (reject, resolve) => fork(
         reject,
-        (b: any) => f(b).fork(reject, resolve)
+        (b) => resolve(f(b))
       ),
       cleanup
     )
@@ -86,22 +89,28 @@ export default class Task {
   /**
    * Apply the successful value of one task to another
    */
-  ap (taska: Task) {
-    return this.chain((f: (b: any) => any) => taska.map(f))
+  ap <B1 = any> (task: Task): Task<A, B1> {
+    return this.chain<B1>(task.map)
   }
 
   /**
    * Transforms the successful value of the task
-   * using a regular unary function
+   * using a function to a monad
    */
-  map (f: (b: any) => void) {
+  chain <B1 = any> (f: (f: PartialMapCallback<B, B1>) => Task<A, B1>) {
     const fork = this.fork
     const cleanup = this.cleanup
 
-    return new Task(
+    return new Task<A, B1>(
       (reject, resolve) => fork(
         reject,
-        (b) => resolve(f(b))
+        (b) => {
+          if (Monad.$valueIsPartialMapCallback<B, B1>(b)) {
+            f(b).fork(reject, resolve)
+          }
+
+          throw new TypeError('The value passed to resolve is not a function')
+        }
       ),
       cleanup
     )

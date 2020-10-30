@@ -1,14 +1,17 @@
-export default class Either {
+import Monad from './monad'
+import { MapCallback } from '../types/common'
 
-  static of (b: any) {
-    return new Right(b)
+export default abstract class Either<L, R> extends Monad {
+
+  static of<R> (b: R) {
+    return new Right<R>(b)
   }
 
-  static isLeft (either: Left | Right) {
+  static isLeft<L, R> (either: Left<L> | Right<R>) {
     return either.isLeft
   }
 
-  static tryCatch (fa: () => any, fb: (e: Error) => any) {
+  static tryCatch<L, R> (fa: () => R, fb: (e: Error) => L) {
     try {
       return Either.of(fa())
     } catch (err) {
@@ -16,27 +19,35 @@ export default class Either {
     }
   }
 
-  static fold (fa: (l: any) => any, fb: (r: any) => any, e: Left | Right) {
+  static fold<L, R, T = any, U = any> (fa: (l: L) => T, fb: (r: R) => U, e: Left<L> | Right<R>) {
     return e instanceof Left
       ? fa(e.$value)
       : fb(e.$value)
   }
 
-  $value: Left | Right
+  $value: L | R
 
-  constructor (x: any) {
-    this.$value = x
+  constructor ($value: L | R) {
+    super()
+    this.$value = $value
   }
 
+  get value () {
+    return this.$value
+  }
 }
 
-export class Left extends Either {
+export class Left<L> extends Either<L, void> {
 
-  $value: any
+  static of (): never {
+    throw new Error('Cannot call "Left.of()", use "Either.of()" instead')
+  }
 
-  constructor (x: any) {
-    super(x)
-    this.$value = x
+  $value: L
+
+  constructor ($value: L) {
+    super($value)
+    // this.$value = x
   }
 
   get isLeft () {
@@ -45,16 +56,6 @@ export class Left extends Either {
 
   get isRight () {
     return false
-  }
-
-  get value () {
-    return this.$value
-  }
-
-  // tslint:disable-next-line:no-console
-  inspect (f = console.log) {
-    f('Left', this.$value)
-    return this
   }
 
   map (_: any) {
@@ -70,13 +71,17 @@ export class Left extends Either {
   }
 }
 
-export class Right extends Either {
+export class Right<R> extends Either<void, R> {
 
-  $value: any
+  static of (): never {
+    throw new Error('Cannot call "Right.of()", use "Either.of()" instead')
+  }
 
-  constructor (x: any) {
-    super(x)
-    this.$value = x
+  $value: R
+
+  constructor ($value: R) {
+    super($value)
+    // this.$value = x
   }
 
   get isLeft () {
@@ -87,25 +92,20 @@ export class Right extends Either {
     return true
   }
 
-  get value () {
-    return this.$value
-  }
-
-  // tslint:disable-next-line:no-console
-  inspect (f = console.log) {
-    f('Right', this.$value)
-    return this
-  }
-
-  map (f: (r: any) => Either) {
+  // XXX: validate R1 = R
+  map<R1 = any> (f: MapCallback<R, R1>) {
     return Either.of(f(this.$value))
   }
 
-  ap (f: Right) {
-    return f.map(this.$value)
+  ap <R1 = any> (right: Right<R1>) {
+    if (Monad.$valueIsMapCallback<typeof right.$value, R>(this.$value)) {
+      return right.map(this.$value)
+    }
+
+    throw new TypeError('Either.$value is not a function')
   }
 
-  chain (f: (r: any) => any) {
+  chain <T = any> (f: (r: R) => T) {
     return f(this.$value)
   }
 }

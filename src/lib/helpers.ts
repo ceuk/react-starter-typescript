@@ -1,10 +1,11 @@
+// TODO: replace anys with generics where possible in whole file
+
 import { Left, Right } from './either'
 import List from './list'
 import Maybe from './maybe'
 import Task from './task'
 import TaskEither from './taskeither'
-
-type TMonad = Maybe | Task | TaskEither | Left | Right | List
+import Monad from './monad'
 
 // tslint:disable-next-line:ban-types
 export const pipe = (...fns: Function[]) =>
@@ -23,16 +24,15 @@ export const curry = (f: (...args: any[]) => any) => {
 }
 
 export const identity = (x: any) => x
-
-export const map = curry((f: () => any, m: TMonad) => {
+export const map = curry((f: () => any, m: Monad) => {
   return m.map(f)
 })
 
-export const ap = curry((f: () => any, m: TMonad) => {
+export const ap = curry((f: () => any, m: Monad) => {
   return m.ap(f)
 })
 
-export const chain = curry((f: () => any, m: TMonad) => {
+export const chain = curry((f: () => any, m: Monad) => {
   return m.chain(f)
 })
 
