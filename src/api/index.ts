@@ -4,7 +4,7 @@ import { chain, curry, identity, map, pipe, prop } from '../lib/helpers'
 import { getItem } from '../lib/localstorage'
 import TaskEither from '../lib/taskeither'
 import { MakeCommonRequest } from '../types/auth'
-import { AnyFnSingleParam } from '../types/common'
+import { AnyUnaryFn } from '../types/common'
 
 // API Config
 const baseURLs = {
@@ -32,7 +32,7 @@ const getToken = () => {
  * @param maybeToken Either-wrapped token string
  * @returns axios client wrapped in TaskEither
  */
-const getAuthenticatedClient = (maybeToken: Either) => {
+const getAuthenticatedClient = (maybeToken: Either<Error, string>) => {
   // TODO - make this pure
   const baseURL = baseURLs[process.env.NODE_ENV] || baseURLs.development
   return pipe(
@@ -68,7 +68,7 @@ const getUnauthenticatedClient = () => {
 const createRequest = curry((params: AxiosRequestConfig, client: AxiosInstance) => {
   const requestTask = TaskEither.tryCatch(
     () => client(params),
-    identity as AnyFnSingleParam
+    identity as AnyUnaryFn
   )
   return pipe(
     map(prop('data'))

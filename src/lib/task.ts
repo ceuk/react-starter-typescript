@@ -1,5 +1,4 @@
-import { curry } from 'ramda'
-import { AnyFnSingleParam, PartialMapCallback } from '../types/common'
+import { PartialMapCallback } from '../types/common'
 import Monad from './monad'
 
 export type TTaskReject <A = any> = (a?: A) => void
