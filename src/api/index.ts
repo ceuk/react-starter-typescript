@@ -17,7 +17,7 @@ const baseURLs = {
  * retrieves the currentUser field from localStorage, converts from Either -> TaskEither
  * and maps to the 'token' field
  *
- * @returns TaskEither-wrapped token string
+ * @returns Either-wrapped token string
  */
 const getToken = () => {
   return pipe(
@@ -29,7 +29,7 @@ const getToken = () => {
 /**
  * Creats an axios client with the appriopriate base URL and Auth header
  *
- * @param maybeToken TaskEither-wrapped token string
+ * @param maybeToken Either-wrapped token string
  * @returns axios client wrapped in TaskEither
  */
 const getAuthenticatedClient = (maybeToken: Either) => {
@@ -49,7 +49,7 @@ const getAuthenticatedClient = (maybeToken: Either) => {
 /**
  * Creats an axios client with the appriopriate base URL
  *
- * @returns axios client wrapped in TaskEither
+ * @returns axios client wrapped in Either
  */
 const getUnauthenticatedClient = () => {
   const baseURL = baseURLs[process.env.NODE_ENV] || baseURLs.development
