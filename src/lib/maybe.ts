@@ -1,44 +1,56 @@
 import { curry } from 'ramda'
+import { MapCallback } from '../types/common'
+import Monad from './monad'
 
-export default class Maybe {
+export default class Maybe<T = any> extends Monad {
 
   // tslint:disable-next-line:no-console
   static inspect = curry((f = console.log, maybe: Maybe) => {
-    f(maybe.isNothing ? 'Nothing' : maybe.$value)
+    if (maybe.isNothing) {
+      f('Nothing')
+    } else {
+      f('Just: ', maybe.$value)
+    }
+
     return maybe
   })
 
-  static of (x: any) {
-    return new Maybe(x)
+  static of <T> ($value: T) {
+    return new Maybe($value)
   }
 
-  $value: any
+  $value: T
 
-  constructor (x: any) {
-    this.$value = x
+  constructor ($value: T) {
+    super()
+    this.$value = $value
   }
 
   get isNothing () {
-    return this.$value === null || this.$value === undefined
+    return this.$value != null
   }
 
-  chain (f: ($value: any) => any) {
+  chain <U = any> (f: ($value: T) => U) {
     return this.isNothing ? this : f(this.$value)
   }
 
-  map (f: ($value: any) => Maybe) {
+  map <U = any> (f: MapCallback<T, U>): Maybe<T | U> {
     return this.isNothing ? this : Maybe.of(f(this.$value))
   }
 
-  ap (f: Maybe) {
-    return this.isNothing ? this : f.map(this.$value)
+  ap <U = any> (maybe: Maybe<U>): Maybe<T | U> {
+    if (Monad.$valueIsMapCallback<typeof maybe.$value, T>(this.$value)) {
+      return this.isNothing ? this : maybe.map(this.$value)
+    }
+
+    throw TypeError('Maybe.$value is not a function')
   }
 
   getOrError (e: Error | string) {
     return this.isNothing ? e : this.$value
   }
 
-  fold (fa: () => any, fb: (x: any) => any) {
+  fold <U1 = any, U2 = any> (fa: () => U1, fb: (x: T) => U2) {
     return this.isNothing
       ? fa()
       : fb(this.$value)
