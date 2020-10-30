@@ -1,33 +1,32 @@
-export default class List {
+import { ArrayCallbackFn } from '../types/common'
+import Monad from './monad'
 
-  static of (x: any) {
-    return new List([x])
+export default class List<T> extends Monad {
+
+  static of<T> ($value: T) {
+    return new List<T>([$value])
   }
 
-  $value: any[]
-  constructor (xs: any[]) {
-    this.$value = xs
+  $value: T[]
+
+  constructor ($value: T[]) {
+    super()
+    this.$value = $value
   }
 
-  // tslint:disable-next-line:no-console
-  inspect (f = console.log) {
-    f('List:', this.$value)
-    return this
+  concat<U> (x: U[]) {
+    return new List<T | U>((this.$value as (T | U)[]).concat(x))
   }
 
-  concat (x: any) {
-    return new List(this.$value.concat(x))
-  }
-
-  map (f: (v: any) => any) {
+  map <U = any> (f: ArrayCallbackFn<T, U>) {
     return new List(this.$value.map(f))
   }
 
   ap () {
-    return this.$value
+    throw new Error('Not implemented: List.ap()')
   }
 
-  chain (f: (v: any) => any) {
+  chain <U = any> (f: ArrayCallbackFn<T, U>) {
     return this.$value.map(f)
   }
 }
