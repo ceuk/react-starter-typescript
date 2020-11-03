@@ -1,0 +1,118 @@
+@import '../../styles/variables';
+
+.root {
+  position: relative;
+  color: #fff;
+  background: $C-BrandPrimary;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0.3rem;
+  display: block;
+  padding: $S-Small $S-Base;
+  font: $T-Size-Regular;
+  line-height: 1 !important;
+  font-weight: $T-Bold !important;
+  transition: all .2s ease-in-out;
+  overflow: hidden;
+  user-select: none;
+
+  &:hover {
+    background: lighten($C-BrandPrimary, 10%);
+    color: $C-Gray-2;
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+    background: $C-Gray-3 !important;
+    color: #fff !important;
+  }
+
+  & > svg {
+    margin-right: $S-Tiny;
+    float: left;
+    transform: scale(1.2) translateY(0.01em);
+  }
+}
+
+.inline {
+  display: inline-block;
+}
+
+.iconOnly {
+  svg {
+    margin: 0;
+  }
+}
+
+.loadingOverlay {
+  position: absolute;
+  cursor: progress;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba($C-BrandPrimary, 0.85);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-rolling" style="background: none;" stroke="currentColor"><circle cx="50" cy="50" fill="none" stroke="white" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138" transform="rotate(203.819 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></circle></svg>');
+    width: 2em;
+    height: 2em;
+    display: inline-block;
+    opacity: 0.5;
+  }
+}
+
+.secondary {
+  background: transparent;
+  color: $C-BrandPrimary;
+  border: 0.1rem solid $C-BrandPrimary;
+
+  &:hover {
+    background: $C-Gray-1;
+    color: darken($C-BrandPrimary, 5%);
+  }
+}
+
+.success {
+  background: $C-Success;
+  border: 0;
+
+  &:hover {
+    background: darken($C-Success, 5%);
+  }
+}
+
+.error {
+  background: $C-Error;
+  border: 0;
+
+  &:hover {
+    background: darken($C-Error, 5%);
+  }
+}
+
+.small {
+  font: $T-Size-Small;
+  padding: $S-Tiny $S-Small;
+
+  * {
+    font: $T-Size-Small;
+  }
+}
+
+.large {
+  font: $T-Size-H3;
+
+  * {
+    font: $T-Size-H3;
+  }
+}
+
+.circle {
+  border-radius: 50%;
+  padding: $S-Base;
+}
