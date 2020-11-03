@@ -1,0 +1,77 @@
+@import './variables';
+
+:focus {
+  outline: $C-BrandPrimary solid 1px; /* stylelint-disable-line unit-blacklist */
+}
+
+html {
+  font-size: 62.5%;
+  font-family: $T-Family;
+}
+
+body {
+  font-size: 1.6em;
+  line-height: 2.1rem;
+
+  * {
+    font-size: 1.4rem;
+    box-sizing: border-box;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-bottom: $S-Base;
+  margin-top: 0;
+  font-weight: $T-Regular;
+}
+
+h1 {
+  font: $T-Size-H1;
+  font-weight: $T-Bold;
+}
+
+h2 {
+  font: $T-Size-H2;
+  font-weight: $T-Bold;
+}
+
+h3 {
+  font: $T-Size-H3;
+}
+
+h4 {
+  font: $T-Size-Large;
+}
+
+h5 {
+  font: $T-Size-Regular;
+}
+
+h6,
+small {
+  font: $T-Size-Small;
+}
+
+sub,
+sup {
+  font: $T-Size-Micro;
+}
+
+::placeholder {
+  color: $C-Gray-3;
+}

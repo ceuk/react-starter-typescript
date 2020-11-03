@@ -1,0 +1,52 @@
+/******************************
+ * Colours                    *
+ *****************************/
+$C-BrandPrimary:       #d15e2e;
+$C-BrandSecondary:     #316058;
+$C-BrandTertiary:      #060221;
+$C-BrandQuarternary:   #466eb6;
+$C-BrandQuinary:       #e2cecc;
+
+$C-Gray-1:             #f2f2f2;
+$C-Gray-2:             #e9e2e2;
+$C-Gray-3:             #cbc8c8;
+$C-Gray-4:             #828282;
+$C-Gray-5:             #4f4f4f;
+$C-Gray-6:                #333;
+
+$C-Error:              #e42929;
+$C-Caution:            #e7cd44;
+$C-Warning:            #dfb748;
+$C-Success:            #54dd82;
+
+/******************************
+ * Spacing                    *
+ *****************************/
+$S-Tiny:                0.8rem;
+$S-Small:               1.6rem;
+$S-Base:                2.4rem;
+$S-Large:               4.8rem;
+$S-Huge:                6.4rem;
+
+/******************************
+ * Z-Index                    *
+ *****************************/
+$Z-Bump:                    10;
+$Z-High:                    20;
+$Z-Super:                   30;
+
+/****************************************
+ * Typography                           *
+ ***************************************/
+$T-Family: 'Nunito',arial,helvetica neue,helvetica,sans-serif;
+$T-Light:                            300;
+$T-Regular:                          400;
+$T-Bold:                             700;
+$T-Black:                            900;
+$T-Size-H1:      4.8rem/6.2rem $T-Family;
+$T-Size-H2:      3.6rem/4.2rem $T-Family;
+$T-Size-H3:      2.4rem/2.8rem $T-Family;
+$T-Size-Large:   1.9rem/2.4rem $T-Family;
+$T-Size-Regular: 1.6rem/2.1rem $T-Family;
+$T-Size-Small:   1.4rem/1.8rem $T-Family;
+$T-Size-Micro:     0.9rem/1rem $T-Family;
