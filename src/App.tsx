@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import './App.css'
 import Login from './components/Login/login.container'
 import PrivateRoute from './components/PrivateRoute'
 import WithSession from './components/Session'
