@@ -1,0 +1,34 @@
+@import '../../styles/variables';
+
+.root {
+  padding: $S-Small $S-Base;
+  display: inline-flex;
+  border: 0.1rem solid $C-BrandPrimary;
+  border-radius: 0.3rem;
+  transition: all .2s ease-in-out;
+  transform: translateY(0);
+
+  &:hover {
+    transform: translateY(-0.5rem);
+    border-color: $C-BrandPrimary;
+  }
+}
+
+.icon {
+  margin-right: $S-Small;
+
+  > * {
+    display: block;
+    max-width: 4rem;
+  }
+}
+
+.title {
+  font-weight: $T-Bold;
+  margin-bottom: 0;
+}
+
+.text {
+  font: $T-Size-Small;
+  margin-bottom: 0;
+}
