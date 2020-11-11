@@ -1,8 +1,8 @@
 import { PartialMapCallback } from '../types/common'
 import Monad from './monad'
 
-export type TTaskReject <A = any> = (a?: A) => void
-export type TTaskResolve <B = any> = (b?: B) => void
+export type TTaskReject <A = any> = (a: A) => void
+export type TTaskResolve <B = any> = (b: B) => void
 export type TTaskCleanup <C = any> = (c?: C) => void
 export type TTaskCallback <A = any, B = any> = (reject: TTaskReject<A>, resolve: TTaskResolve<B>) => any
 
@@ -14,7 +14,7 @@ export default class Task<A = any, B = any> extends Monad {
   }
 
   static rejected <A = any> (a: A) {
-    return new Task((reject: TTaskReject) => reject(a))
+    return new Task((reject: TTaskReject<A>) => reject(a))
   }
 
   fork: TTaskCallback<A, B>

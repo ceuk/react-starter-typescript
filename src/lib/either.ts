@@ -13,9 +13,9 @@ export default abstract class Either<L, R> extends Monad {
 
   static tryCatch<L, R> (fa: () => R, fb: (e: Error) => L) {
     try {
-      return Either.of(fa())
+      return Either.of<R>(fa())
     } catch (err) {
-      return new Left(fb(err))
+      return new Left<L>(fb(err))
     }
   }
 
@@ -24,6 +24,10 @@ export default abstract class Either<L, R> extends Monad {
       ? fa(e.$value)
       : fb(e.$value)
   }
+
+  abstract get isLeft (): boolean
+
+  abstract get isRight (): boolean
 
   $value: L | R
 
