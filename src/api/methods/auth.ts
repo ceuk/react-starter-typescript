@@ -1,5 +1,6 @@
 import { makeAuthenticatedRequest, makeUnauthenticatedRequest } from '..'
-import { ILoginPayload } from '../../types/auth'
+import Either from '../../lib/either'
+import { ILoginPayload, IStoredToken } from '../../types/auth'
 
 /**
  * Attempts to log in using the supplied credentials
@@ -15,7 +16,7 @@ export const loginRequest = ({ email, password }: ILoginPayload) => {
       email,
       password
     }
-  })
+  }) as Promise<Either<Error, IStoredToken>>
 }
 
 /**
@@ -27,5 +28,5 @@ export const validateTokenRequest = () => {
   return makeAuthenticatedRequest({
     url: '/auth/validateToken',
     method: 'GET'
-  })
+  }) as Promise<Either<Error, void>>
 }

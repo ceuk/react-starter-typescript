@@ -1,11 +1,12 @@
+import { PartialMapCallback } from '../types/common'
 import Either, { Left, Right } from './either'
 import { left } from './helpers'
 import Task from './task'
 
-export default class TaskEither extends Task {
+export default class TaskEither<A = any, B = any> extends Task<A, B> {
 
-  static tryCatch (f: () => any, g: (b: any) => any) {
-    return new TaskEither(async (reject, resolve) => {
+  static tryCatch <A = any, B = any> (f: () => B, g: (b: Error) => A) {
+    return new TaskEither<Left<A>, Right<B>>(async (reject, resolve) => {
       try {
         const b = await f()
         resolve(Either.of(b))
@@ -15,45 +16,45 @@ export default class TaskEither extends Task {
     })
   }
 
-  static fromEither (m: Left | Right) {
-    return new TaskEither((resolve, reject) => {
+  static fromEither<A = any, B = any> (m: Either<A, B>) {
+    return new TaskEither<Left<A>, Right<B>>((reject, resolve) => {
       if (m.isLeft) {
-        reject(left(m.value))
+        reject(left(m.$value as A))
       } else {
-        resolve(Either.of(m.value))
+        resolve(Either.of(m.$value as B))
       }
     })
   }
 
-  static runIfValid (x: TaskEither | Left | Error): Left | Error | Promise<Left | Right> {
+  static runIfValid <A = any, B = any> (x: TaskEither<A, B> | A | B): Promise<Either<A, B> | A | B> {
     return x instanceof TaskEither
-      ? new Promise((resolve) => {
+      ? new Promise<any>((resolve) => {
         x.fork(resolve, resolve)
       })
-      : x
+      : Promise.resolve(x)
   }
 
-  map (f: (b: any) => void) {
+  map <B1 = any> (f: PartialMapCallback<B, B1>) {
     const fork = this.fork
     const cleanup = this.cleanup
 
-    return new TaskEither(
+    return new TaskEither<A, B1>(
       (reject, resolve) => fork(
         reject,
-        (b) => resolve(b.map(f))
+        (b) => resolve((b as any)?.map(f))
       ),
       cleanup
     )
   }
 
-  chain (f: (b: any) => Task) {
+  chain <B1 = any> (f: (b: any) => Task<A, B1>) {
     const fork = this.fork
     const cleanup = this.cleanup
 
-    return new TaskEither(
+    return new TaskEither<A, B1>(
       (reject, resolve) => fork(
         reject,
-        (b: any) => f(b).fork(reject, resolve)
+        (b) => f(b).fork(reject, resolve)
       ),
       cleanup
     )
